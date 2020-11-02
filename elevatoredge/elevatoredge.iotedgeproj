@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|AnyCPU">
+      <Configuration>Debug</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|AnyCPU">
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>17ae5b9c-1a5a-4876-b83b-2be1e5cdf445</ProjectGuid>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EdgeTargetPlatform>Windows Amd64</EdgeTargetPlatform>
+    <EdgeTargetConfiguration>Release</EdgeTargetConfiguration>
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsRoot)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Azure IoT Edge Tools\AzureIoTEdgeProject.targets" />
+  <ItemGroup>
+    <None Include="deployment.template.json" />
+    <None Include="deployment.debug.template.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\elevatoredgemodule\elevatoredgemodule.csproj" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsRoot)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Azure IoT Edge Tools\AzureIoTEdgeProject.Build.targets" />
+  <Import Project="$(MSBuildToolsRoot)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Azure IoT Edge Tools\AzureIoTEdgeProject.Build.props" />
+</Project>

@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30523.141
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{34036844-64E7-43A5-9151-4AD90E180989}") = "elevatoredge", "elevatoredge\elevatoredge.iotedgeproj", "{17AE5B9C-1A5A-4876-B83B-2BE1E5CDF445}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "elevatoredgemodule", "elevatoredgemodule\elevatoredgemodule.csproj", "{96AC1831-8231-495B-96AC-04CD8FE18120}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{17AE5B9C-1A5A-4876-B83B-2BE1E5CDF445}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17AE5B9C-1A5A-4876-B83B-2BE1E5CDF445}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17AE5B9C-1A5A-4876-B83B-2BE1E5CDF445}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17AE5B9C-1A5A-4876-B83B-2BE1E5CDF445}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96AC1831-8231-495B-96AC-04CD8FE18120}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96AC1831-8231-495B-96AC-04CD8FE18120}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96AC1831-8231-495B-96AC-04CD8FE18120}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96AC1831-8231-495B-96AC-04CD8FE18120}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ADB2462E-0FCC-4889-8E99-C7E239D6650F}
+	EndGlobalSection
+EndGlobal
