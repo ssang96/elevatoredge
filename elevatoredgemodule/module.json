@@ -1,10 +1,10 @@
 {
     "$schema-version": "0.0.1",
-    "description": "",
+    "description": "Elevator Edge Module",
   "image": {
     "repository": "devadttsopregistry.azurecr.io/elevatoredgemodule",
     "tag": {
-      "version": "0.2.9",
+      "version": "0.3.1",
       "platforms": {
         "amd64": "./Dockerfile.amd64",
         "amd64.debug": "./Dockerfile.amd64.debug",

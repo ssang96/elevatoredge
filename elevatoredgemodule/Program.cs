@@ -125,8 +125,6 @@ namespace elevatoredgemodule
                     azureWebAppAddress = desiredProperties["AzureWebAppAddress"];
                     reportedProperties["AzureWebAppAddress"] = azureWebAppAddress;
 
-                    buildingID = Environment.GetEnvironmentVariable("BUILDINGID");
-
                     Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} Azure Web App Address : {azureWebAppAddress}");
                 }
 
