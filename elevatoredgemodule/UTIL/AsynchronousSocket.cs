@@ -175,11 +175,23 @@ namespace elevatoredgemodule.UTIL
         /// </summary>
         private void SendStartCommand()
         {
+            string targetServerIP = iep.Address.ToString();
+
+            string[] ipAddress = targetServerIP.Split('.');
+
+            string serverIP = int.Parse(ipAddress[0]).ToString("D3")
+                + "." + int.Parse(ipAddress[1]).ToString("D3")
+                + "." + int.Parse(ipAddress[2]).ToString("D3")
+                + "." + int.Parse(ipAddress[3]).ToString("D3");
+
             ComCommand StartCommand = new ComCommand();
-            StartCommand.IpAddress = Encoding.ASCII.GetBytes("127.000.001.001");
-            StartCommand.PortNumber = Encoding.ASCII.GetBytes("1234");
+            StartCommand.IpAddress = Encoding.ASCII.GetBytes(serverIP);
+            StartCommand.PortNumber = Encoding.ASCII.GetBytes("8000");
             StartCommand.Status = (byte)'1';
 
+            Send(StartCommand.GetByte());
+
+            StartCommand.Status = (byte)'2';
             Send(StartCommand.GetByte());
         }
 
