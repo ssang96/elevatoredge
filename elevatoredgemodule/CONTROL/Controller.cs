@@ -25,27 +25,32 @@ namespace elevatoredgemodule.CONTROL
         /// <summary>
         /// 엘리베이터 서버 IP
         /// </summary>
-        public string TargetIPAddress { get; set; } = "127.0.0.1";
+        public string targetIPAddress { get; set; } = "127.0.0.1";
 
         /// <summary>
         /// 엘리베이터 서버 PORT
         /// </summary>
-        public int TargetPort { get; set; } =  20000;
+        public int targetPort { get; set; } =  8000;
 
         /// <summary>
         /// 건물 아이디 
         /// </summary>
-        public string BuildingID { get; set; } = "build_id_001";
+        public string buildingID { get; set; } = "build_id_001";
 
         /// <summary>
         /// Azure Web App의 주소
         /// </summary>
-        public string TargetServerURL { get; set; } = "https://adt-dev-kc-connectivity-tsop-web.azurewebsites.net/event/elevator/status";
+        public string targetServerURL { get; set; } = "https://adt-dev-kc-connectivity-tsop-web.azurewebsites.net/event/elevator/status";
 
         /// <summary>
         /// 디바이스 아이디 및 엣지 모듈 아이디
         /// </summary>
-        public string DeviceID { get; set; } = "iotedge01/elevatoriotedgemodule";
+        public string deviceID { get; set; } = "iotedge01/elevatoriotedgemodule";
+
+        /// <summary>
+        /// 호기 정보를 관리하는 객체
+        /// </summary>
+        private UnitDataController unitDataController = null;
 
         /// <summary>
         /// 생성자
@@ -56,7 +61,12 @@ namespace elevatoredgemodule.CONTROL
             protocol = new Protocol();
             protocol.AddProtocolItem(Marshal.SizeOf(typeof(StatusNotification)), true, new CheckFunction(StatusNotificationCheck), new CatchFunction(StatusNotificationCatch));
 
-            StartAsyncSocket(TargetIPAddress, TargetPort);
+            unitDataController = new UnitDataController();
+            unitDataController.webappUrl    = targetServerURL;
+            unitDataController.buildingid   = buildingID;
+            unitDataController.deviceid     = deviceID;
+
+            StartAsyncSocket(targetIPAddress, targetPort);
         }
 
         /// <summary>
@@ -68,13 +78,19 @@ namespace elevatoredgemodule.CONTROL
             protocol = new Protocol();
             protocol.AddProtocolItem(Marshal.SizeOf(typeof(StatusNotification)), true, new CheckFunction(StatusNotificationCheck), new CatchFunction(StatusNotificationCatch));
 
-            this.TargetIPAddress    = elevatorIP;
-            this.TargetPort         = elevatorPort;
-            this.BuildingID         = buildingID;
-            this.TargetServerURL    = webappAddress;
-            this.DeviceID           = deviceID;
+            this.targetIPAddress    = elevatorIP;
+            this.targetPort         = elevatorPort;
+            this.buildingID         = buildingID;
+            this.targetServerURL    = webappAddress;
+            this.deviceID           = deviceID;
 
-            StartAsyncSocket(elevatorIP, elevatorPort);
+            unitDataController = new UnitDataController();
+
+            unitDataController.webappUrl = targetServerURL;
+            unitDataController.buildingid = buildingID;
+            unitDataController.deviceid = deviceID;
+
+            StartAsyncSocket(targetIPAddress, targetPort);
         }
 
         /// <summary>
@@ -86,8 +102,8 @@ namespace elevatoredgemodule.CONTROL
         {
             try
             {
-                this.TargetIPAddress = remoteIPAddress;
-                this.TargetPort = port;
+                this.targetIPAddress = remoteIPAddress;
+                this.targetPort = port;
 
                 ClientSocket = new AsynchronousSocket(remoteIPAddress, port);
                 ClientSocket.Received += new ReceiveDelegate(OnReceived);
@@ -127,7 +143,7 @@ namespace elevatoredgemodule.CONTROL
             Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [Controller : StatusNotificationCatch] {System.Text.Encoding.ASCII.GetString(Data)} Status Received.");
             HttpClientTransfer HttpTransfer = new HttpClientTransfer();
 
-            Task<string> task = Task.Run<string>(async() => await HttpTransfer.PostWebAPI(TargetServerURL, System.Text.Encoding.ASCII.GetString(Data), BuildingID, DeviceID));
+            this.unitDataController.ReceiveStatus(System.Text.Encoding.ASCII.GetString(Data));
             return true;
         }
 

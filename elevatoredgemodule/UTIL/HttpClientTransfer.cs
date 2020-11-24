@@ -18,14 +18,14 @@ namespace elevatoredgemodule.UTIL
         /// </summary>
         /// <param name="ReceivedData"></param>
         /// <returns></returns>
-        public async Task<string> PostWebAPI(string webappURL, string recevieData, string buildingID, string deviceID)
+        public static async Task<string> PostWebAPI(string webappURL, string recevieData, string buildingID, string deviceID, DateTime dates)
         {
             string result = string.Empty;
             var packet = new HttpPacket();
 
             packet.building_id  = buildingID;
             packet.device_id    = deviceID;
-            packet.event_time   = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            packet.event_time   = dates.ToString("yyyy-MM-dd HH:mm:ss");
             packet.receive_data = recevieData;
 
             HttpClient client = null;

@@ -103,7 +103,7 @@ namespace elevatoredgemodule
                 Console.WriteLine(JsonConvert.SerializeObject(desiredProperties));
                
                 var reportedProperties = new TwinCollection();
-
+                                
                 if (desiredProperties["ElevatorServerIP"] != null)
                 {
                     elevatorServerIP = desiredProperties["ElevatorServerIP"];
@@ -154,7 +154,7 @@ namespace elevatoredgemodule
                     controller.Dispose();
                     Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} Controller Class Disposed");
                 }
-
+                
                 controller = new Controller(elevatorServerIP, int.Parse(elevatorServerPort), azureWebAppAddress, buildingID, deviceID);
             }
             catch (AggregateException ex)
