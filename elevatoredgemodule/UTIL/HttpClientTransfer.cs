@@ -52,7 +52,10 @@ namespace elevatoredgemodule.UTIL
 
                 result = response.StatusCode.ToString();
                 
-                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : PostWebAPI] {response.StatusCode} Received From WebApp");                
+                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : PostWebAPI] {response.StatusCode} Received From WebApp");
+
+                client.Dispose();
+                client = null;
             }
             catch(Exception ex)
             {

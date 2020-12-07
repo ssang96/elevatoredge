@@ -140,8 +140,7 @@ namespace elevatoredgemodule.CONTROL
         private bool StatusNotificationCatch(object sender, byte[] Data)
         {
             Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [Controller : StatusNotificationCatch] {System.Text.Encoding.ASCII.GetString(Data)} Status Received.");
-            HttpClientTransfer HttpTransfer = new HttpClientTransfer();
-
+        
             this.unitDataController.ReceiveStatus(System.Text.Encoding.ASCII.GetString(Data));
             return true;
         }
