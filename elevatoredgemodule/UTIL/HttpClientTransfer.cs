@@ -18,7 +18,7 @@ namespace elevatoredgemodule.UTIL
         /// </summary>
         /// <param name="ReceivedData"></param>
         /// <returns></returns>
-        public static async Task<string> PostWebAPI(string webappURL, string recevieData, string buildingID, string deviceID, DateTime dates)
+        public static async Task<string> PostWebAPI(string webappURL, string recevieData, string buildingID, string deviceID, DateTime dates, string type)
         {
             string result = string.Empty;
             var packet = new HttpPacket();
@@ -44,6 +44,7 @@ namespace elevatoredgemodule.UTIL
                 };
 
                 client = new HttpClient(handler);
+                client.DefaultRequestHeaders.Add("type", type);
 
                 //Pass in the full URL and the json string content
                 var response = await client.PostAsync(new Uri(webappURL), data);

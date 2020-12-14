@@ -153,6 +153,7 @@ namespace elevatoredgemodule
                 {
                     controller.Dispose();
                     Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} Controller Class Disposed");
+                    controller = null;
                 }
                 
                 controller = new Controller(elevatorServerIP, int.Parse(elevatorServerPort), azureWebAppAddress, buildingID, deviceID);

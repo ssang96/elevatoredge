@@ -222,7 +222,7 @@ namespace elevatoredgemodule.UTIL
             if (!this.IsConnected)
             {
                 this.IsConnected = true;
-                Thread.Sleep(5000);
+                Thread.Sleep(1);
             }
 
             if (this.TcpClientSocket != null)

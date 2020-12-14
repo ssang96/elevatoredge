@@ -1,17 +1,20 @@
 ﻿using elevatoredgemodule.MODEL;
 using elevatoredgemodule.UTIL;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
 namespace elevatoredgemodule.CONTROL
 {
+    /// <summary>
+    /// 수신한 데이터의 변경 사항 체크 및 데이터 전송 클래스
+    /// </summary>
     class UnitDataController
     {
         /// <summary>
         /// UnitData 객체를 관리하는 컬렉션 객체
         /// </summary>
-        private Dictionary<string, UnitData> unitDataCollection = null;
+        private ConcurrentDictionary<string, UnitData> unitDataCollection = null;
 
         /// <summary>
         /// 건물 아이디 
@@ -33,11 +36,11 @@ namespace elevatoredgemodule.CONTROL
         /// </summary>
         public UnitDataController()
         {
-            unitDataCollection = new Dictionary<string, UnitData>();      
+            unitDataCollection = new ConcurrentDictionary<string, UnitData>();      
         }
 
         /// <summary>
-        /// 엘리베이터에서 수신한 데이터를 체크하여 변동 사항이 있는 데이터만 Web App으로 전송하는 메소드
+        /// 엘리베이터에서 수신한 데이터를 체크하여 변동 사항 체크 메소드
         /// </summary>
         /// <param name="status"></param>
         public void ReceiveStatus(string status)
@@ -53,7 +56,7 @@ namespace elevatoredgemodule.CONTROL
             //기존에 호기 정보가 있다면, status 비교
             if (unitData != null)       
             {
-                if (unitData.status == status)
+                if (unitData.status.Substring(6) == status.Substring(6))
                 {
                     unitDataCollection[unitName].recevieDate = DateTime.Now;
                 }
@@ -62,8 +65,7 @@ namespace elevatoredgemodule.CONTROL
                     unitDataCollection[unitName].recevieDate = DateTime.Now;
                     unitDataCollection[unitName].status = status;
 
-                    //변동 사항이 있으므로 Web App으로 전송
-                    Task<string> task = Task.Run<string>(async() => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, unitDataCollection[unitName].recevieDate));
+                    this.SendStatusData(status, unitDataCollection[unitName].recevieDate);
                 }
             }
             else
@@ -73,10 +75,28 @@ namespace elevatoredgemodule.CONTROL
                 unit.recevieDate = DateTime.Now;
                 unit.status = status;
 
-                unitDataCollection.Add(unitName, unit);
+                unitDataCollection.TryAdd(unitName, unit);
+                
+                this.SendStatusData(status, unit.recevieDate);
+            }
+        }
 
-                //신규 호기 데이터이므로 Web App으로 전송
-                Task<string> task = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, unitDataCollection[unitName].recevieDate));
+        /// <summary>
+        /// Web App으로 전송하는 메소드
+        /// </summary>
+        /// <param name="status"></param>
+        /// <param name="date"></param>
+        private void SendStatusData(string status, DateTime date)
+        {
+            if (status.Substring(9, 2) == "00")
+            {
+                var dataType = "general";
+                Task<string> task = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, date, dataType));
+            }
+            else //긴급
+            {
+                var dataType = "emergency";
+                Task<string> task = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, date, dataType));
             }
         }
     }
