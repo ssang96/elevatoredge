@@ -190,6 +190,9 @@ namespace elevatoredgemodule.CONTROL
             }
         }
 
+        /// <summary>
+        /// 소켓 클라이언트 정리하는 메소드
+        /// </summary>
         public void Dispose()
         {
             ClientSocket?.CloseAsynchSocket();
