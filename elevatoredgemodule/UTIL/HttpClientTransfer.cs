@@ -38,12 +38,20 @@ namespace elevatoredgemodule.UTIL
                 //Needed to setup the body of the request
                 StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var handler = new HttpClientHandler()
+                if (webappURL.ToUpper().Contains("HTTPS"))
                 {
-                    SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls
-                };
+                    var handler = new HttpClientHandler()
+                    {
+                        SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls
+                    };
 
-                client = new HttpClient(handler);
+                    client = new HttpClient(handler);
+                }
+                else
+                {
+                    client = new HttpClient();
+                }
+
                 client.DefaultRequestHeaders.Add("type", type);
 
                 //Pass in the full URL and the json string content
