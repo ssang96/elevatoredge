@@ -73,7 +73,7 @@ namespace elevatoredgemodule.MODEL
             return Data;
         }
 
-        public static StatusNotification SetByte(byte[] Buffer)
+        public StatusNotification SetByte(byte[] Buffer)
         {
             if (Marshal.SizeOf(typeof(StatusNotification)) != Buffer.Length) throw new Exception("버퍼의 사이즈가 맞지 않습니다.");
             IntPtr ptrStruct = IntPtr.Zero;

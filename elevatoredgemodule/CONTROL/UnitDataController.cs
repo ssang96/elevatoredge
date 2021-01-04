@@ -2,6 +2,7 @@
 using elevatoredgemodule.UTIL;
 using System;
 using System.Collections.Concurrent;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace elevatoredgemodule.CONTROL
@@ -43,20 +44,20 @@ namespace elevatoredgemodule.CONTROL
         /// 엘리베이터에서 수신한 데이터를 체크하여 변동 사항 체크 메소드
         /// </summary>
         /// <param name="status"></param>
-        public void ReceiveStatus(string status)
+        public void ReceiveStatus(StatusNotification status)
         {
             UnitData unitData = null;
 
             //호기 추출
-            var unitName = status.Substring(1, 2);
-            
+            var unitName = Encoding.UTF8.GetString(status.Unit);
+
             //호기 정보 조회
             unitDataCollection.TryGetValue(unitName, out unitData);
 
             //기존에 호기 정보가 있다면, status 비교
             if (unitData != null)       
             {
-                if (unitData.status.Substring(6) == status.Substring(6))
+                if (unitData.status.Direction == status.Direction)
                 {
                     unitDataCollection[unitName].recevieDate = DateTime.Now;
                 }
@@ -86,16 +87,18 @@ namespace elevatoredgemodule.CONTROL
         /// </summary>
         /// <param name="status"></param>
         /// <param name="date"></param>
-        private void SendStatusData(string status, DateTime date)
+        private void SendStatusData(StatusNotification status, DateTime date)
         {
-            if (status.Substring(9, 2) == "00")
+            var dataType = "";
+
+            if (Encoding.UTF8.GetString(status.Alarm) == "00")
             {
-                var dataType = "general";
+                dataType = "general";
                 Task<string> task = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, date, dataType));
             }
             else //긴급
             {
-                var dataType = "emergency";
+                dataType = "emergency";
                 Task<string> task = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, date, dataType));
             }
         }

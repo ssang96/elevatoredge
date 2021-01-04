@@ -66,7 +66,7 @@
         "ElevatorServerIP": "10.0.0.4",
         "ElevatorServerPort": "20000",
         "AzureWebAppAddress": "https://adt-dev-kc-connectivity-tsop-web.azurewebsites.net/event/elevator/status",
-        "BuildingID": "build_id_001",
+        "BuildingID": "0001",
         "DeviceID": "iotedge01/elevatoriotedgemodule"
       }
     }

@@ -2,6 +2,8 @@
 using elevatoredgemodule.UTIL;
 using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using System.Timers;
 
 namespace elevatoredgemodule.CONTROL
 {
@@ -23,6 +25,7 @@ namespace elevatoredgemodule.CONTROL
 
         /// <summary>
         /// 엘리베이터 서버 IP
+        /// T TOWER - 150.3.2.250
         /// </summary>
         public string targetIPAddress { get; set; } = "127.0.0.1";
 
@@ -33,13 +36,14 @@ namespace elevatoredgemodule.CONTROL
 
         /// <summary>
         /// 건물 아이디 
+        /// T TOWER - 0001
         /// </summary>
-        public string buildingID { get; set; } = "build_id_001";
+        public string buildingID { get; set; } = "0001";
 
         /// <summary>
         /// Azure Web App의 주소
         /// </summary>
-        public string targetServerURL { get; set; } = "https://skt-stg-kc-ev-app.azurewebsites.net/event/elevator/status";
+        public string azureWebAppURL { get; set; } = "https://skt-stg-kc-ev-app.azurewebsites.net/event/elevator/status";
 
         /// <summary>
         /// 디바이스 아이디 및 엣지 모듈 아이디
@@ -52,6 +56,11 @@ namespace elevatoredgemodule.CONTROL
         private UnitDataController unitDataController = null;
 
         /// <summary>
+        /// IBS와 엣지간의 통신 상태를 체크하는 Timer
+        /// </summary>
+        private Timer comCheckTimer = null;
+
+        /// <summary>
         /// 생성자
         /// 초기화
         /// </summary>
@@ -61,9 +70,19 @@ namespace elevatoredgemodule.CONTROL
             protocol.AddProtocolItem(Marshal.SizeOf(typeof(StatusNotification)), true, new CheckFunction(StatusNotificationCheck), new CatchFunction(StatusNotificationCatch));
 
             unitDataController = new UnitDataController();
-            unitDataController.webappUrl    = targetServerURL;
+            unitDataController.webappUrl    = azureWebAppURL;
             unitDataController.buildingid   = buildingID;
-            unitDataController.deviceid     = deviceID;
+            
+            var moduleId    = Environment.GetEnvironmentVariable("IOTEDGE_MODULEID");
+            string deviceId = Environment.GetEnvironmentVariable("IOTEDGE_DEVICEID");
+
+            unitDataController.deviceid = $"{deviceId}/{moduleId}";
+
+            comCheckTimer = new Timer();
+            comCheckTimer.Interval = 30000;
+            
+            comCheckTimer.Elapsed += new ElapsedEventHandler(CommCheck);
+            comCheckTimer.Enabled = true;        
 
             StartAsyncSocket(targetIPAddress, targetPort);
         }
@@ -72,7 +91,7 @@ namespace elevatoredgemodule.CONTROL
         /// 생성자
         /// 초기화
         /// </summary>
-        public Controller(String elevatorIP, int elevatorPort, String webappAddress, String buildingID, String deviceID)
+        public Controller(String elevatorIP, int elevatorPort, String webappAddress, String buildingID, String timeInterval)
         {
             protocol = new Protocol();
             protocol.AddProtocolItem(Marshal.SizeOf(typeof(StatusNotification)), true, new CheckFunction(StatusNotificationCheck), new CatchFunction(StatusNotificationCatch));
@@ -80,16 +99,73 @@ namespace elevatoredgemodule.CONTROL
             this.targetIPAddress    = elevatorIP;
             this.targetPort         = elevatorPort;
             this.buildingID         = buildingID;
-            this.targetServerURL    = webappAddress;
+            this.azureWebAppURL     = webappAddress;
             this.deviceID           = deviceID;
 
             unitDataController = new UnitDataController();
 
-            unitDataController.webappUrl = targetServerURL;
-            unitDataController.buildingid = buildingID;
+            unitDataController.webappUrl    = azureWebAppURL;
+            unitDataController.buildingid   = buildingID;
+
+            var moduleId    = Environment.GetEnvironmentVariable("IOTEDGE_MODULEID");
+            string deviceId = Environment.GetEnvironmentVariable("IOTEDGE_DEVICEID");
+
+            deviceID = $"{deviceId}/{moduleId}";
             unitDataController.deviceid = deviceID;
 
+            comCheckTimer = new Timer();
+            comCheckTimer.Interval = int.Parse(timeInterval) * 1000;
+
+            comCheckTimer.Elapsed += new ElapsedEventHandler(CommCheck);
+            comCheckTimer.Enabled = true;
+
+            Console.WriteLine($"Device ID : {deviceId} Module ID : {moduleId}");
+
             StartAsyncSocket(targetIPAddress, targetPort);
+        }
+
+        /// <summary>
+        /// IBS와 엣지간의 통신 상태를 체크하는 Timer 메소드
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CommCheck(object sender, ElapsedEventArgs e)
+        {
+            Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [Controller : CommCheck] Check Commmunication between IBS and Edge");
+
+            if (ClientSocket != null)
+            {
+                ComHttpPacket comHttpPacket = new ComHttpPacket();
+
+                try
+                {
+                    var dataType = "";
+
+                    comHttpPacket.building_id   = this.buildingID;                    
+                    comHttpPacket.inspection_datetime    = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                    if (ClientSocket.IsConnected)
+                    {
+                        dataType = "general";
+                        comHttpPacket.inspection_result_val = "connected";
+                        comHttpPacket.inspection_result_cd  = "0";
+
+                        Task<string> task = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(azureWebAppURL, comHttpPacket, this.buildingID, this.deviceID, dataType));
+                    }
+                    else
+                    {
+                        dataType = "emergency";
+                        comHttpPacket.inspection_result_val = "disconnected";
+                        comHttpPacket.inspection_result_cd = "1";
+
+                        Task<string> task = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(azureWebAppURL, comHttpPacket, this.buildingID, this.deviceID, dataType));
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [Controller : CommCheck] {ex.Message}");
+                }
+            }
         }
 
         /// <summary>
@@ -140,8 +216,10 @@ namespace elevatoredgemodule.CONTROL
         private bool StatusNotificationCatch(object sender, byte[] Data)
         {
             Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [Controller : StatusNotificationCatch] {System.Text.Encoding.ASCII.GetString(Data)} Status Received.");
-        
-            this.unitDataController.ReceiveStatus(System.Text.Encoding.ASCII.GetString(Data));
+
+            StatusNotification statusNoti = new StatusNotification();
+
+            this.unitDataController.ReceiveStatus(statusNoti.SetByte(Data));
             return true;
         }
 
@@ -164,7 +242,13 @@ namespace elevatoredgemodule.CONTROL
         public void CloseAsyncSocket()
         {
             if (this.ClientSocket != null)
-                this.ClientSocket.CloseAsynchSocket();           
+                this.ClientSocket.CloseAsynchSocket();
+
+            if (this.comCheckTimer != null && this.comCheckTimer.Enabled)
+            {
+                this.comCheckTimer.Enabled = false;
+                this.comCheckTimer.Dispose();
+            }
         }
 
         /// <summary>

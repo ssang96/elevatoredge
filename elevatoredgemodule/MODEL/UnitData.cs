@@ -20,6 +20,6 @@ namespace elevatoredgemodule.MODEL
         /// <summary>
         /// IBS로부터 수신한 이벤트 데이터
         /// </summary>
-        public string status { get; set; }
+        public StatusNotification status { get; set; }
     }
 }

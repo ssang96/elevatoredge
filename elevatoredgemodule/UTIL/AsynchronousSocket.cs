@@ -53,18 +53,32 @@ namespace elevatoredgemodule.UTIL
         /// <summary>
         /// 수신 데이터 버퍼 사이즈 
         /// </summary>
-        public const int BufferSize = 1024;		   
+        public const int BufferSize = 1024;
 
         /// <summary>
         /// 서버 접속 여부 플래그
         /// </summary>
-        private bool IsConnected = false;
+        public bool IsConnected { get; set; } = false;
 
         /// <summary>
         /// 데이터 받았을때 이벤트
         /// </summary>
-        public event ReceiveDelegate Received = null;      
+        public event ReceiveDelegate Received = null;
+
+        /// <summary>
+        /// TCP 접속을 위한 EndPoint 클래스
+        /// </summary>
         private IPEndPoint iep = null;
+
+        /// <summary>
+        /// 접속 서버의 아이피
+        /// </summary>
+        private string serverip;
+
+        /// <summary>
+        ///접속 서버의 포트
+        /// </summary>
+        private int serverPort;
             
         /// <summary>
         /// 생성자
@@ -73,8 +87,11 @@ namespace elevatoredgemodule.UTIL
         /// <param name="remoteEP"></param>
         public AsynchronousSocket(string ip, int port)
         {
-            IPAddress IpAddress = IPAddress.Parse(ip);
-            iep = new IPEndPoint(IpAddress, port);
+            serverip = ip;
+            serverPort = port;
+
+            IPAddress IpAddress = IPAddress.Parse(serverip);
+            iep = new IPEndPoint(IpAddress, serverPort);
 
             Task.Run(() => InitComm());            
         }
@@ -186,7 +203,7 @@ namespace elevatoredgemodule.UTIL
 
             ComCommand StartCommand = new ComCommand();
             StartCommand.IpAddress = Encoding.ASCII.GetBytes(serverIP);
-            StartCommand.PortNumber = Encoding.ASCII.GetBytes("8000");
+            StartCommand.PortNumber = Encoding.ASCII.GetBytes(serverPort.ToString());
             StartCommand.Status = (byte)'1';
 
             Send(StartCommand.GetByte());

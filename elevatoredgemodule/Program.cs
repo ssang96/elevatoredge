@@ -45,9 +45,9 @@ namespace elevatoredgemodule
         private static string buildingID;
 
         /// <summary>
-        /// 모듈의 아이디 
+        /// 통신 상태 Interval
         /// </summary>
-        private static string deviceID;
+        private static string checkInterval;
 
         static void Main(string[] args)
         {
@@ -135,13 +135,13 @@ namespace elevatoredgemodule
 
                     Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} Building ID : {buildingID}");
                 }
-
-                if (desiredProperties["DeviceID"] != null)
+                                
+                if (desiredProperties["CheckInterval"] != null)
                 {
-                    deviceID = desiredProperties["DeviceID"];
-                    reportedProperties["DeviceID"] = deviceID;
+                    checkInterval = desiredProperties["CheckInterval"];
+                    reportedProperties["CheckInterval"] = checkInterval;
 
-                    Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} Device ID : {deviceID}");
+                    Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} Check Interval : {checkInterval}");
                 }
 
                 if (reportedProperties.Count > 0)
@@ -155,8 +155,8 @@ namespace elevatoredgemodule
                     Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} Controller Class Disposed");
                     controller = null;
                 }
-                
-                controller = new Controller(elevatorServerIP, int.Parse(elevatorServerPort), azureWebAppAddress, buildingID, deviceID);
+
+                controller = new Controller(elevatorServerIP, int.Parse(elevatorServerPort), azureWebAppAddress, buildingID, checkInterval);
             }
             catch (AggregateException ex)
             {
