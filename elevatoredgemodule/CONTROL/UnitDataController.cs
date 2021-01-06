@@ -57,7 +57,12 @@ namespace elevatoredgemodule.CONTROL
             //기존에 호기 정보가 있다면, status 비교
             if (unitData != null)       
             {
-                if (unitData.status.Direction == status.Direction)
+                var recevieBytesData = Encoding.UTF8.GetString(status.GetByte());
+                var previewsBytesData = Encoding.UTF8.GetString(unitData.status.GetByte());
+
+                Console.WriteLine($"Previews : {previewsBytesData.Substring(6, 5)}, Current : {recevieBytesData.Substring(6, 5)}");
+
+                if (previewsBytesData.Substring(6, 5) == recevieBytesData.Substring(6, 5))
                 {
                     unitDataCollection[unitName].recevieDate = DateTime.Now;
                 }
@@ -99,7 +104,10 @@ namespace elevatoredgemodule.CONTROL
             else //긴급
             {
                 dataType = "emergency";
-                Task<string> task = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, date, dataType));
+                Task<string> emergencyTask = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, date, dataType));
+
+                dataType = "general";
+                Task<string> generalTask = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, date, dataType));
             }
         }
     }

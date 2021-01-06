@@ -243,12 +243,6 @@ namespace elevatoredgemodule.CONTROL
         {
             if (this.ClientSocket != null)
                 this.ClientSocket.CloseAsynchSocket();
-
-            if (this.comCheckTimer != null && this.comCheckTimer.Enabled)
-            {
-                this.comCheckTimer.Enabled = false;
-                this.comCheckTimer.Dispose();
-            }
         }
 
         /// <summary>
@@ -280,6 +274,12 @@ namespace elevatoredgemodule.CONTROL
         public void Dispose()
         {
             ClientSocket?.CloseAsynchSocket();
+
+            if (this.comCheckTimer != null && this.comCheckTimer.Enabled)
+            {
+                this.comCheckTimer.Enabled = false;
+                this.comCheckTimer.Dispose();
+            }
 
             // Suppress finalization.
             GC.SuppressFinalize(this);
