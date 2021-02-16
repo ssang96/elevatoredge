@@ -43,7 +43,7 @@ namespace elevatoredgemodule.CONTROL
         /// <summary>
         /// Azure Web App의 주소
         /// </summary>
-        public string azureWebAppURL { get; set; } = "https://skt-stg-kc-ev-app.azurewebsites.net/event/elevator/status";
+        public string azureWebAppURL { get; set; } = "https://skt-prd-kc-ev-app.azurewebsites.net";
 
         /// <summary>
         /// 디바이스 아이디 및 엣지 모듈 아이디

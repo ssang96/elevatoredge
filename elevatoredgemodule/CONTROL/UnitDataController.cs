@@ -60,14 +60,8 @@ namespace elevatoredgemodule.CONTROL
                 var recevieBytesData = Encoding.UTF8.GetString(status.GetByte());
                 var previewsBytesData = Encoding.UTF8.GetString(unitData.status.GetByte());
 
-                Console.WriteLine($"Previews : {previewsBytesData.Substring(6, 5)}, Current : {recevieBytesData.Substring(6, 5)}");
-
-                if (previewsBytesData.Substring(6, 5) == recevieBytesData.Substring(6, 5))
-                {
-                    unitDataCollection[unitName].recevieDate = DateTime.Now;
-                }
-                else
-                {
+                if (previewsBytesData.Substring(6, 5) != recevieBytesData.Substring(6, 5))
+                {                    
                     unitDataCollection[unitName].recevieDate = DateTime.Now;
                     unitDataCollection[unitName].status = status;
 
@@ -97,12 +91,12 @@ namespace elevatoredgemodule.CONTROL
             var dataType = "";
 
             if (Encoding.UTF8.GetString(status.Alarm) == "00")
-            {
+            {              
                 dataType = "general";
                 Task<string> task = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, date, dataType));
             }
             else //긴급
-            {
+            {              
                 dataType = "emergency";
                 Task<string> emergencyTask = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, date, dataType));
 
