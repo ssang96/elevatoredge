@@ -2,6 +2,7 @@
 using elevatoredgemodule.UTIL;
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -60,6 +61,9 @@ namespace elevatoredgemodule.CONTROL
         /// </summary>
         private Timer comCheckTimer = null;
 
+
+        private HttpClientTransfer httpClientTransfer = null;
+
         /// <summary>
         /// 생성자
         /// 초기화
@@ -70,6 +74,8 @@ namespace elevatoredgemodule.CONTROL
             protocol.AddProtocolItem(Marshal.SizeOf(typeof(StatusNotification)), true, new CheckFunction(StatusNotificationCheck), new CatchFunction(StatusNotificationCatch));
 
             unitDataController = new UnitDataController();
+            httpClientTransfer = new HttpClientTransfer();
+
             unitDataController.webappUrl    = azureWebAppURL;
             unitDataController.buildingid   = buildingID;
             
@@ -103,14 +109,15 @@ namespace elevatoredgemodule.CONTROL
             this.deviceID           = deviceID;
 
             unitDataController = new UnitDataController();
-
-            unitDataController.webappUrl    = azureWebAppURL;
-            unitDataController.buildingid   = buildingID;
+            httpClientTransfer = new HttpClientTransfer();
 
             var moduleId    = Environment.GetEnvironmentVariable("IOTEDGE_MODULEID");
             string deviceId = Environment.GetEnvironmentVariable("IOTEDGE_DEVICEID");
 
             deviceID = $"{deviceId}/{moduleId}";
+
+            unitDataController.webappUrl = azureWebAppURL;
+            unitDataController.buildingid = buildingID;
             unitDataController.deviceid = deviceID;
 
             comCheckTimer = new Timer();
@@ -150,7 +157,7 @@ namespace elevatoredgemodule.CONTROL
                         comHttpPacket.inspection_result_val = "connected";
                         comHttpPacket.inspection_result_cd  = "0";
 
-                        Task<string> task = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(azureWebAppURL, comHttpPacket, this.buildingID, this.deviceID, dataType));
+                        Task<string> task = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(azureWebAppURL, comHttpPacket, this.buildingID, this.deviceID, dataType));
                     }
                     else
                     {
@@ -158,7 +165,7 @@ namespace elevatoredgemodule.CONTROL
                         comHttpPacket.inspection_result_val = "disconnected";
                         comHttpPacket.inspection_result_cd = "1";
 
-                        Task<string> task = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(azureWebAppURL, comHttpPacket, this.buildingID, this.deviceID, dataType));
+                        Task<string> task = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(azureWebAppURL, comHttpPacket, this.buildingID, this.deviceID, dataType));
                     }
                 }
                 catch(Exception ex)
@@ -219,7 +226,11 @@ namespace elevatoredgemodule.CONTROL
 
             StatusNotification statusNoti = new StatusNotification();
 
-            this.unitDataController.ReceiveStatus(statusNoti.SetByte(Data));
+            var returnResult = this.unitDataController.ReceiveStatus(statusNoti.SetByte(Data));
+
+            if (returnResult != null)
+                this.SendStatusData(returnResult.Item1, returnResult.Item2);
+
             return true;
         }
 
@@ -265,6 +276,30 @@ namespace elevatoredgemodule.CONTROL
                 }
 
                 this.ClientSocket.Send(command);
+            }
+        }
+
+        /// <summary>
+        /// Web App으로 전송하는 메소드
+        /// </summary>
+        /// <param name="status"></param>
+        /// <param name="date"></param>
+        private void SendStatusData(StatusNotification status, DateTime date)
+        {
+            var dataType = "";
+
+            if (Encoding.UTF8.GetString(status.Alarm) == "00")
+            {
+                dataType = "general";
+                Task<string> task = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(this.azureWebAppURL, status,  this.buildingID, this.deviceID, date, dataType));
+            }
+            else //긴급
+            {
+                dataType = "emergency";
+                Task<string> emergencyTask = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(this.azureWebAppURL, status, this.buildingID, this.deviceID, date, dataType));
+
+                dataType = "general";
+                Task<string> generalTask = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(this.azureWebAppURL, status, this.buildingID, this.deviceID, date, dataType));
             }
         }
 

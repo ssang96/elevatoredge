@@ -1,9 +1,7 @@
 ﻿using elevatoredgemodule.MODEL;
-using elevatoredgemodule.UTIL;
 using System;
 using System.Collections.Concurrent;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace elevatoredgemodule.CONTROL
 {
@@ -44,7 +42,7 @@ namespace elevatoredgemodule.CONTROL
         /// 엘리베이터에서 수신한 데이터를 체크하여 변동 사항 체크 메소드
         /// </summary>
         /// <param name="status"></param>
-        public void ReceiveStatus(StatusNotification status)
+        public Tuple<StatusNotification, DateTime> ReceiveStatus(StatusNotification status)
         {
             UnitData unitData = null;
 
@@ -53,6 +51,8 @@ namespace elevatoredgemodule.CONTROL
 
             //호기 정보 조회
             unitDataCollection.TryGetValue(unitName, out unitData);
+
+            Tuple<StatusNotification, DateTime> returnResult = null;
 
             //기존에 호기 정보가 있다면, status 비교
             if (unitData != null)       
@@ -65,7 +65,7 @@ namespace elevatoredgemodule.CONTROL
                     unitDataCollection[unitName].recevieDate = DateTime.Now;
                     unitDataCollection[unitName].status = status;
 
-                    this.SendStatusData(status, unitDataCollection[unitName].recevieDate);
+                    returnResult = new Tuple<StatusNotification, DateTime>(status, unitDataCollection[unitName].recevieDate);
                 }
             }
             else
@@ -76,33 +76,11 @@ namespace elevatoredgemodule.CONTROL
                 unit.status = status;
 
                 unitDataCollection.TryAdd(unitName, unit);
-                
-                this.SendStatusData(status, unit.recevieDate);
-            }
-        }
 
-        /// <summary>
-        /// Web App으로 전송하는 메소드
-        /// </summary>
-        /// <param name="status"></param>
-        /// <param name="date"></param>
-        private void SendStatusData(StatusNotification status, DateTime date)
-        {
-            var dataType = "";
-
-            if (Encoding.UTF8.GetString(status.Alarm) == "00")
-            {              
-                dataType = "general";
-                Task<string> task = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, date, dataType));
+                returnResult = new Tuple<StatusNotification, DateTime>(status, unit.recevieDate);
             }
-            else //긴급
-            {              
-                dataType = "emergency";
-                Task<string> emergencyTask = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, date, dataType));
 
-                dataType = "general";
-                Task<string> generalTask = Task.Run<string>(async () => await HttpClientTransfer.PostWebAPI(webappUrl, status, buildingid, deviceid, date, dataType));
-            }
+            return returnResult;
         }
     }
 }
