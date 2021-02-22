@@ -20,13 +20,13 @@
             }
           },
           "edgeHub": {
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
             "settings": {
               "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
-              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}"
-            }
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}"
+            },
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always"
           }
         },
         "modules": {}
@@ -48,7 +48,7 @@
         "ElevatorServerIP": "10.0.0.4",
         "ElevatorServerPort": "20000",
         "AzureWebAppAddress": "https://adt-dev-kc-connectivity-tsop-web.azurewebsites.net/event/elevator/status",
-        "BuildingID": "build_id_001",
+        "BuildingID": "0001",
         "DeviceID": "iotedge01/elevatoriotedgemodule"
       }
     }

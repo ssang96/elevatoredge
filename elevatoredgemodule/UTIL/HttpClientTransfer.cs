@@ -56,10 +56,9 @@ namespace elevatoredgemodule.UTIL
                 
                 var client = httpClientFactory.CreateClient();                
                 client.DefaultRequestHeaders.Add("type", type);
-                client.Timeout = TimeSpan.FromSeconds(60);
-
+  
                 var response = await client.PostAsync(new Uri(webappURL + "/event/elevator/status"), data);
-                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : status] {json} Send To WebApp ");
+                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : status] {json} Send To WebApp {response.StatusCode}");
             }
             catch (Exception ex)
             {
@@ -79,7 +78,7 @@ namespace elevatoredgemodule.UTIL
         /// <param name="deviceID"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public async Task<string> PostWebAPI(string webappURL, ComHttpPacket comStatus, string buildingID, string deviceID, string type)
+        public async Task<string> PostWebAPI(string webappURL, ComHttpPacket comStatus, string type)
         {
             string result = string.Empty;
 
@@ -89,11 +88,14 @@ namespace elevatoredgemodule.UTIL
                 
                 StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
 
+                httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();
+
                 var client = httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("type", type);    
-               
+                client.DefaultRequestHeaders.Add("type", type);
+                client.Timeout = TimeSpan.FromSeconds(60);
+
                 var response = await client.PostAsync(new Uri(webappURL + "/event/elevator/health"), data);
-                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : health] {json} Send To WebApp");               
+                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : health] {json} Send To WebApp and Receive {response.StatusCode}");               
             }
             catch (Exception ex)
             {

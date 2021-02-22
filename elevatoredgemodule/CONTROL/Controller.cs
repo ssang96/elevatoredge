@@ -157,7 +157,7 @@ namespace elevatoredgemodule.CONTROL
                         comHttpPacket.inspection_result_val = "connected";
                         comHttpPacket.inspection_result_cd  = "0";
 
-                        Task<string> task = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(azureWebAppURL, comHttpPacket, this.buildingID, this.deviceID, dataType));
+                        Task<string> task = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(azureWebAppURL, comHttpPacket, dataType));
                     }
                     else
                     {
@@ -165,7 +165,7 @@ namespace elevatoredgemodule.CONTROL
                         comHttpPacket.inspection_result_val = "disconnected";
                         comHttpPacket.inspection_result_cd = "1";
 
-                        Task<string> task = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(azureWebAppURL, comHttpPacket, this.buildingID, this.deviceID, dataType));
+                        Task<string> task = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(azureWebAppURL, comHttpPacket, dataType));
                     }
                 }
                 catch(Exception ex)
