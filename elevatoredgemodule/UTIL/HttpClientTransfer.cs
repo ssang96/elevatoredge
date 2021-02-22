@@ -58,7 +58,7 @@ namespace elevatoredgemodule.UTIL
                 client.DefaultRequestHeaders.Add("type", type);
   
                 var response = await client.PostAsync(new Uri(webappURL + "/event/elevator/status"), data);
-                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : status] {json} Send To WebApp {response.StatusCode}");
+                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : status] {json} Send To WebApp");
             }
             catch (Exception ex)
             {
@@ -95,7 +95,7 @@ namespace elevatoredgemodule.UTIL
                 client.Timeout = TimeSpan.FromSeconds(60);
 
                 var response = await client.PostAsync(new Uri(webappURL + "/event/elevator/health"), data);
-                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : health] {json} Send To WebApp and Receive {response.StatusCode}");               
+                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : health] {json} Send To WebApp");               
             }
             catch (Exception ex)
             {
