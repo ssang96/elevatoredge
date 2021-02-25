@@ -55,8 +55,9 @@ namespace elevatoredgemodule.UTIL
                 httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();
                 
                 var client = httpClientFactory.CreateClient();                
-                client.DefaultRequestHeaders.Add("type", type);
-  
+                client.DefaultRequestHeaders.Add("type", type);               
+                client.Timeout = TimeSpan.FromMinutes(3);
+
                 var response = await client.PostAsync(new Uri(webappURL + "/event/elevator/status"), data);
                 Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : status] {json} Send To WebApp");
             }
@@ -92,7 +93,7 @@ namespace elevatoredgemodule.UTIL
 
                 var client = httpClientFactory.CreateClient();
                 client.DefaultRequestHeaders.Add("type", type);
-                client.Timeout = TimeSpan.FromSeconds(60);
+                client.Timeout = TimeSpan.FromMinutes(3);
 
                 var response = await client.PostAsync(new Uri(webappURL + "/event/elevator/health"), data);
                 Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : health] {json} Send To WebApp");               
