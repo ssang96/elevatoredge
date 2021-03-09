@@ -28,7 +28,7 @@ namespace elevatoredgemodule.CONTROL
         /// 엘리베이터 서버 IP
         /// T TOWER - 150.3.2.250
         /// </summary>
-        public string targetIPAddress { get; set; } = "127.0.0.1";
+        public string targetIPAddress { get; set; } = "192.168.1.33";
 
         /// <summary>
         /// 엘리베이터 서버 PORT

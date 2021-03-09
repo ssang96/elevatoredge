@@ -1,6 +1,6 @@
 ﻿using elevatoredgemodule.MODEL;
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Text;
 
 namespace elevatoredgemodule.CONTROL
@@ -13,7 +13,7 @@ namespace elevatoredgemodule.CONTROL
         /// <summary>
         /// UnitData 객체를 관리하는 컬렉션 객체
         /// </summary>
-        private ConcurrentDictionary<string, UnitData> unitDataCollection = null;
+        private Dictionary<string, UnitData> unitDataCollection = null;
 
         /// <summary>
         /// 건물 아이디 
@@ -35,7 +35,7 @@ namespace elevatoredgemodule.CONTROL
         /// </summary>
         public UnitDataController()
         {
-            unitDataCollection = new ConcurrentDictionary<string, UnitData>();      
+            unitDataCollection = new Dictionary<string, UnitData>();      
         }
 
         /// <summary>
@@ -49,35 +49,38 @@ namespace elevatoredgemodule.CONTROL
             //호기 추출
             var unitName = Encoding.UTF8.GetString(status.Unit);
 
-            //호기 정보 조회
-            unitDataCollection.TryGetValue(unitName, out unitData);
-
             Tuple<StatusNotification, DateTime> returnResult = null;
 
-            //기존에 호기 정보가 있다면, status 비교
-            if (unitData != null)       
+            //호기 정보 조회
+            lock (unitDataCollection)
             {
-                var recevieBytesData = Encoding.UTF8.GetString(status.GetByte());
-                var previewsBytesData = Encoding.UTF8.GetString(unitData.status.GetByte());
+                unitDataCollection.TryGetValue(unitName, out unitData);
 
-                if (previewsBytesData.Substring(6, 5) != recevieBytesData.Substring(6, 5))
-                {                    
-                    unitDataCollection[unitName].recevieDate = DateTime.Now;
-                    unitDataCollection[unitName].status = status;
+                //기존에 호기 정보가 있다면, status 비교
+                if (unitData != null)
+                {
+                    var recevieBytesData = Encoding.UTF8.GetString(status.GetByte());
+                    var previewsBytesData = Encoding.UTF8.GetString(unitData.status.GetByte());
 
-                    returnResult = new Tuple<StatusNotification, DateTime>(status, unitDataCollection[unitName].recevieDate);
+                    if (previewsBytesData.Substring(6, 5) != recevieBytesData.Substring(6, 5))
+                    {
+                        unitDataCollection[unitName].recevieDate = DateTime.Now;
+                        unitDataCollection[unitName].status = status;
+
+                        returnResult = new Tuple<StatusNotification, DateTime>(status, unitDataCollection[unitName].recevieDate);
+                    }
                 }
-            }
-            else
-            {
-                UnitData unit = new UnitData();
-                unit.unitName = unitName;
-                unit.recevieDate = DateTime.Now;
-                unit.status = status;
+                else
+                {
+                    UnitData unit = new UnitData();
+                    unit.unitName = unitName;
+                    unit.recevieDate = DateTime.Now;
+                    unit.status = status;
 
-                unitDataCollection.TryAdd(unitName, unit);
+                    unitDataCollection.TryAdd(unitName, unit);
 
-                returnResult = new Tuple<StatusNotification, DateTime>(status, unit.recevieDate);
+                    returnResult = new Tuple<StatusNotification, DateTime>(status, unit.recevieDate);
+                }
             }
 
             return returnResult;
