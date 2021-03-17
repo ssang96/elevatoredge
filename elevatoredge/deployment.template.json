@@ -11,9 +11,9 @@
             "loggingOptions": "",
             "registryCredentials": {
               "tsocontainerregistries": {
-                "username": "sktstgkcedgeacr",
-                "password": "iCBSaW/6LSGJFldiNXMoykrjfNGHl3zN",
-                "address": "sktstgkcedgeacr.azurecr.io"
+                "username": "sktoprkcedgeacr",
+                "password": "wrSBpH1n0SKM=3/J9dMZEErsUcNDy3j=",
+                "address": "sktoprkcedgeacr.azurecr.io"
               }
             }
           }

@@ -1,6 +1,6 @@
 ﻿using elevatoredgemodule.MODEL;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Text;
 
 namespace elevatoredgemodule.CONTROL
@@ -13,7 +13,7 @@ namespace elevatoredgemodule.CONTROL
         /// <summary>
         /// UnitData 객체를 관리하는 컬렉션 객체
         /// </summary>
-        private Dictionary<string, UnitData> unitDataCollection = null;
+        private ConcurrentDictionary<string, UnitData> unitDataCollection = null;
 
         /// <summary>
         /// 건물 아이디 
@@ -29,13 +29,13 @@ namespace elevatoredgemodule.CONTROL
         /// 디바이스 아이디 및 엣지 모듈 아이디
         /// </summary>
         public string deviceid = string.Empty;
-        
+
         /// <summary>
         /// 생성자
         /// </summary>
         public UnitDataController()
         {
-            unitDataCollection = new Dictionary<string, UnitData>();      
+            unitDataCollection = new ConcurrentDictionary<string, UnitData>();
         }
 
         /// <summary>
@@ -49,38 +49,35 @@ namespace elevatoredgemodule.CONTROL
             //호기 추출
             var unitName = Encoding.UTF8.GetString(status.Unit);
 
+            //호기 정보 조회
+            unitDataCollection.TryGetValue(unitName, out unitData);
+
             Tuple<StatusNotification, DateTime> returnResult = null;
 
-            //호기 정보 조회
-            lock (unitDataCollection)
+            //기존에 호기 정보가 있다면, status 비교
+            if (unitData != null)
             {
-                unitDataCollection.TryGetValue(unitName, out unitData);
+                var recevieBytesData = Encoding.UTF8.GetString(status.GetByte());
+                var previewsBytesData = Encoding.UTF8.GetString(unitData.status.GetByte());
 
-                //기존에 호기 정보가 있다면, status 비교
-                if (unitData != null)
+                if (previewsBytesData.Substring(6, 5) != recevieBytesData.Substring(6, 5))
                 {
-                    var recevieBytesData = Encoding.UTF8.GetString(status.GetByte());
-                    var previewsBytesData = Encoding.UTF8.GetString(unitData.status.GetByte());
+                    unitDataCollection[unitName].recevieDate = DateTime.Now;
+                    unitDataCollection[unitName].status = status;
 
-                    if (previewsBytesData.Substring(6, 5) != recevieBytesData.Substring(6, 5))
-                    {
-                        unitDataCollection[unitName].recevieDate = DateTime.Now;
-                        unitDataCollection[unitName].status = status;
-
-                        returnResult = new Tuple<StatusNotification, DateTime>(status, unitDataCollection[unitName].recevieDate);
-                    }
+                    returnResult = new Tuple<StatusNotification, DateTime>(status, unitDataCollection[unitName].recevieDate);
                 }
-                else
-                {
-                    UnitData unit = new UnitData();
-                    unit.unitName = unitName;
-                    unit.recevieDate = DateTime.Now;
-                    unit.status = status;
+            }
+            else
+            {
+                UnitData unit = new UnitData();
+                unit.unitName = unitName;
+                unit.recevieDate = DateTime.Now;
+                unit.status = status;
 
-                    unitDataCollection.TryAdd(unitName, unit);
+                unitDataCollection.TryAdd(unitName, unit);
 
-                    returnResult = new Tuple<StatusNotification, DateTime>(status, unit.recevieDate);
-                }
+                returnResult = new Tuple<StatusNotification, DateTime>(status, unit.recevieDate);
             }
 
             return returnResult;
