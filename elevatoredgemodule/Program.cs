@@ -101,7 +101,7 @@ namespace elevatoredgemodule
             {
                 Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} Desired property change:");
                 Console.WriteLine(JsonConvert.SerializeObject(desiredProperties));
-               
+
                 var reportedProperties = new TwinCollection();
                                 
                 if (desiredProperties["ElevatorServerIP"] != null)
@@ -156,7 +156,7 @@ namespace elevatoredgemodule
                     controller = null;
                 }
 
-                controller = new Controller(elevatorServerIP, int.Parse(elevatorServerPort), azureWebAppAddress, buildingID, checkInterval);
+                controller = new Controller(elevatorServerIP, int.Parse(elevatorServerPort), azureWebAppAddress, buildingID, checkInterval);               
             }
             catch (AggregateException ex)
             {

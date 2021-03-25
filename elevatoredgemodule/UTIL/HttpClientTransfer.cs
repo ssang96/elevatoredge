@@ -31,9 +31,11 @@ namespace elevatoredgemodule.UTIL
         /// <param name="dates"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public async Task<string> PostWebAPI(string webappURL, StatusNotification recevieData, string buildingID, string deviceID, DateTime dates, string type)
+        public async Task<bool> PostWebAPI(string webappURL, StatusNotification recevieData, string buildingID, string deviceID, DateTime dates, string type)
         {
-            string result = string.Empty;
+            bool result = true;
+            string json = string.Empty;
+
             var packet = new HttpPacket();
             packet.building_id = buildingID;
             packet.device_id = deviceID;
@@ -49,22 +51,23 @@ namespace elevatoredgemodule.UTIL
                 packet.elevator_status  = Convert.ToChar(recevieData.Status).ToString();
                 packet.alarm_cd         = Encoding.UTF8.GetString(recevieData.Alarm);
                
-                string json = JsonConvert.SerializeObject(packet);              
+                json = JsonConvert.SerializeObject(packet);              
 
                 StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                 httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();
                 
                 var client = httpClientFactory.CreateClient();                
                 client.DefaultRequestHeaders.Add("type", type);               
-                client.Timeout = TimeSpan.FromMinutes(3);
+                client.Timeout = TimeSpan.FromMinutes(2);
 
                 var response = await client.PostAsync(new Uri(webappURL + "/event/elevator/status"), data);
                 Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : status] {json} Send To WebApp");
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [status error] Data : {json}");
                 Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [status error] {ex.Message}");
-                result = ex.Message;
+                result = false;
             }
 
             return result;
@@ -79,13 +82,14 @@ namespace elevatoredgemodule.UTIL
         /// <param name="deviceID"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public async Task<string> PostWebAPI(string webappURL, ComHttpPacket comStatus, string type)
+        public async Task<bool> PostWebAPI(string webappURL, ComHttpPacket comStatus, string type)
         {
-            string result = string.Empty;
+            bool result = true;
+            string json = string.Empty;
 
             try
             {               
-                string json = JsonConvert.SerializeObject(comStatus);
+                json = JsonConvert.SerializeObject(comStatus);
                 
                 StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -93,15 +97,16 @@ namespace elevatoredgemodule.UTIL
 
                 var client = httpClientFactory.CreateClient();
                 client.DefaultRequestHeaders.Add("type", type);
-                client.Timeout = TimeSpan.FromMinutes(3);
+                client.Timeout = TimeSpan.FromMinutes(2);
 
                 var response = await client.PostAsync(new Uri(webappURL + "/event/elevator/health"), data);
                 Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [HttpClientTransfer : health] {json} Send To WebApp");               
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [health error] Data : {json}");
                 Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [health error] {ex.Message}");
-                result = ex.Message;
+                result = false;
             }
 
             return result;

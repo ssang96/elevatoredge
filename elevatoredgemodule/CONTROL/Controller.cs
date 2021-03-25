@@ -156,17 +156,15 @@ namespace elevatoredgemodule.CONTROL
                         dataType = "general";
                         comHttpPacket.inspection_result_val = "connected";
                         comHttpPacket.inspection_result_cd  = "0";
-
-                        Task<string> task = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(azureWebAppURL, comHttpPacket, dataType));
                     }
                     else
                     {
                         dataType = "emergency";
                         comHttpPacket.inspection_result_val = "disconnected";
                         comHttpPacket.inspection_result_cd = "1";
-
-                        Task<string> task = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(azureWebAppURL, comHttpPacket, dataType));
                     }
+
+                    Task<bool> task = Task.Run<bool>(async () => await httpClientTransfer.PostWebAPI(azureWebAppURL, comHttpPacket, dataType));
                 }
                 catch(Exception ex)
                 {
@@ -228,9 +226,6 @@ namespace elevatoredgemodule.CONTROL
 
             var returnResult = this.unitDataController.ReceiveStatus(statusNoti.SetByte(Data));
 
-            if (returnResult != null)
-                this.SendStatusData(returnResult.Item1, returnResult.Item2);
-
             return true;
         }
 
@@ -291,15 +286,15 @@ namespace elevatoredgemodule.CONTROL
             if (Encoding.UTF8.GetString(status.Alarm) == "00")
             {
                 dataType = "general";
-                Task<string> task = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(this.azureWebAppURL, status,  this.buildingID, this.deviceID, date, dataType));
+                Task<bool> task = Task.Run<bool>(async () => await httpClientTransfer.PostWebAPI(this.azureWebAppURL, status,  this.buildingID, this.deviceID, date, dataType));
             }
             else //긴급
             {
                 dataType = "emergency";
-                Task<string> emergencyTask = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(this.azureWebAppURL, status, this.buildingID, this.deviceID, date, dataType));
+                Task<bool> emergencyTask = Task.Run<bool>(async () => await httpClientTransfer.PostWebAPI(this.azureWebAppURL, status, this.buildingID, this.deviceID, date, dataType));              
 
                 dataType = "general";
-                Task<string> generalTask = Task.Run<string>(async () => await httpClientTransfer.PostWebAPI(this.azureWebAppURL, status, this.buildingID, this.deviceID, date, dataType));
+                Task<bool> generalTask = Task.Run<bool>(async () => await httpClientTransfer.PostWebAPI(this.azureWebAppURL, status, this.buildingID, this.deviceID, date, dataType));
             }
         }
 
