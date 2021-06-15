@@ -50,7 +50,7 @@ namespace elevatoredgemodule.CONTROL
         /// 디바이스 아이디 및 엣지 모듈 아이디
         /// </summary>
         public string deviceID { get; set; } = "iotedge01/elevatoriotedgemodule";
-
+         
         /// <summary>
         /// 호기 정보를 관리하는 객체
         /// </summary>
