@@ -1,5 +1,8 @@
 ﻿namespace elevatoredgemodule.MODEL
 {
+    /// <summary>
+    /// 웹앱으로 데이터 전송 HTTP 프로토콜
+    /// </summary>
     class HttpPacket
     {
         public string building_id;

@@ -29,11 +29,22 @@ namespace elevatoredgemodule.CONTROL
             get { return this.m_ProtocolItems.Count; }
         }
 
+        /// <summary>
+        /// 생성자 
+        /// </summary>
         public Protocol()
         {
             m_ProtocolItems = new System.Collections.ArrayList();
         }
 
+        /// <summary>
+        /// ProtocolItem 객체를 추가
+        /// </summary>
+        /// <param name="nBufferSize"></param>
+        /// <param name="bUsing"></param>
+        /// <param name="CheckFunc"></param>
+        /// <param name="CatchFunc"></param>
+        /// <returns></returns>
         public bool AddProtocolItem(int nBufferSize, bool bUsing, CheckFunction CheckFunc, CatchFunction CatchFunc)
         {
             ProtocolItem pI = new ProtocolItem();
@@ -47,6 +58,10 @@ namespace elevatoredgemodule.CONTROL
             return true;
         }
 
+        /// <summary>
+        /// 원형 큐에 데이터 put
+        /// </summary>
+        /// <param name="data"></param>
         public void ProtocolProcessing(byte data)
         {
             try

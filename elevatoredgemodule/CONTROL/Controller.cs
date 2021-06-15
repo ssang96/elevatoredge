@@ -230,7 +230,7 @@ namespace elevatoredgemodule.CONTROL
         }
 
         /// <summary>
-        /// 
+        /// tcp 를 통해서 데이터 수신시 1바이트마다 이벤트 발생
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -310,8 +310,7 @@ namespace elevatoredgemodule.CONTROL
                 this.comCheckTimer.Enabled = false;
                 this.comCheckTimer.Dispose();
             }
-
-            // Suppress finalization.
+           
             GC.SuppressFinalize(this);
         }
     }
